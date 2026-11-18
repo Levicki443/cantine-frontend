@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* CHARTE OFFICIELLE CANTINE MANAGER — 3 COULEURS PRINCIPALES */
+  --color-brand-forest: #183F35;
+  --color-surface-page: #F6F3EA;
+  --color-brand-terracotta: #C87552;
+
+  /* Neutres d'accompagnement pour contraste et typographie */
+  --color-surface-text: #252B28;
+  --color-surface-text-muted: #5A6560;
+  --color-surface-border: #E2DBD0;
+  --color-surface-card: #FFFFFF;
+
+  /* Cinématiques SaaS officielles */
+  --ease-saas: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-bounce-subtle: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@layer base {
+  html {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    color: var(--color-surface-text);
+    background-color: var(--color-surface-page);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background-color: var(--color-surface-page);
+    color: var(--color-surface-text);
+  }
+
+  /* Règle d'accessibilité Motion Design : respect absolu du choix utilisateur */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .ease-saas {
+    transition-timing-function: var(--ease-saas);
+  }
+
+  .ease-bounce-subtle {
+    transition-timing-function: var(--ease-bounce-subtle);
+  }
+}
+
+@layer components {
+  /* Bouton Principal — Vert Forêt Profond */
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-xl font-semibold text-white bg-brand-forest hover:bg-brand-hover active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-brand-forest/30 transition-all duration-200 shadow-sm hover:shadow hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:translate-y-0;
+    transition-timing-function: var(--ease-saas);
+  }
+
+  /* Bouton Accentué — Terracotta */
+  .btn-accent {
+    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-xl font-semibold text-white bg-brand-terracotta hover:bg-brand-accentHover active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-brand-terracotta/30 transition-all duration-200 shadow-sm hover:shadow hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed;
+    transition-timing-function: var(--ease-saas);
+  }
+
+  /* Bouton Neutre — Ivoire / Carte */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-xl font-semibold text-surface-text bg-surface-card border border-surface-border hover:bg-surface-muted hover:border-surface-borderFocus/30 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-surface-borderFocus/20 transition-all duration-200 shadow-sm hover:-translate-y-0.5;
+    transition-timing-function: var(--ease-saas);
+  }
+
+  /* Champ de saisie moderne avec micro-interaction au focus */
+  .input-field {
+    @apply w-full px-3.5 py-2.5 rounded-xl bg-surface-card border border-surface-border text-surface-text placeholder-surface-textMuted focus:outline-none focus:ring-2 focus:ring-brand-forest/20 focus:border-brand-forest transition-all duration-150 text-sm shadow-sm;
+    transition-timing-function: var(--ease-saas);
+  }
+
+  /* Conteneur de carte élégant avec élévation progressive */
+  .card-container {
+    @apply bg-surface-card border border-surface-border rounded-2xl shadow-sm transition-all duration-200;
+    transition-timing-function: var(--ease-saas);
+  }
+
+  /* Carte interactive avec survol subtil */
+  .card-hover {
+    @apply hover:-translate-y-1 hover:shadow-md hover:border-surface-borderFocus/30 transition-all duration-200;
+    transition-timing-function: var(--ease-saas);
+  }
+
+  /* Ligne de tableau avec survol doux */
+  .table-row-hover {
+    @apply transition-colors duration-150 hover:bg-surface-page/70;
+    transition-timing-function: var(--ease-saas);
+  }
+
+  /* Délais en cascade pour apparition progressive naturelle */
+  .stagger-1 { animation-delay: 50ms; }
+  .stagger-2 { animation-delay: 100ms; }
+  .stagger-3 { animation-delay: 150ms; }
+  .stagger-4 { animation-delay: 200ms; }
+  .stagger-5 { animation-delay: 250ms; }
+  .stagger-6 { animation-delay: 300ms; }
+}
