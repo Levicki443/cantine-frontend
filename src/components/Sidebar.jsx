@@ -141,8 +141,6 @@ export const Sidebar = () => {
       titre: 'Espace Convive',
       links: [
         { to: '/client', label: 'Ardoise & Menus du Jour', icon: <UtensilsCrossed className="w-4 h-4" />, end: true },
-        { to: '/client/commandes', label: 'Mes Commandes & Reçus', icon: <Receipt className="w-4 h-4" /> },
-        { to: '/client/profil', label: 'Mon Solde & Compte', icon: <CreditCard className="w-4 h-4" /> },
         { to: '/client/avis', label: 'Partager un Avis', icon: <MessageSquareHeart className="w-4 h-4" /> }
       ]
     }
