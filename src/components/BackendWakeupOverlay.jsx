@@ -13,10 +13,13 @@ const MAX_TIMEOUT_SECONDES = 90;
 const TIMEOUT_LOCAL_SECONDES = 6;
 
 export const BackendWakeupOverlay = () => {
+  const apiUrl = import.meta.env.VITE_API_URL || '';
+  const isLocalApi = apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1');
   const isLocalhost = typeof window !== 'undefined' && 
     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-  const maxAttente = isLocalhost ? TIMEOUT_LOCAL_SECONDES : MAX_TIMEOUT_SECONDES;
+  // N'utiliser le court délai local que si le backend tourne lui aussi en local
+  const maxAttente = (isLocalhost && isLocalApi) ? TIMEOUT_LOCAL_SECONDES : MAX_TIMEOUT_SECONDES;
 
   const [visible, setVisible] = useState(() => {
     return sessionStorage.getItem('cantine_backend_awake') !== 'true';
