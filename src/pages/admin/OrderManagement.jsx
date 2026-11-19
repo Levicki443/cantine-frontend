@@ -21,12 +21,13 @@ import {
 } from 'lucide-react';
 
 const STATUTS = [
-  'en_attente',
-  'confirmee',
-  'en_preparation',
-  'prete',
-  'livree',
-  'annulee'
+  { value: 'créée', label: 'Créée' },
+  { value: 'confirmée', label: 'Confirmée' },
+  { value: 'en préparation', label: 'En préparation' },
+  { value: 'prête', label: 'Prête' },
+  { value: 'servie', label: 'Servie' },
+  { value: 'livrée', label: 'Livrée' },
+  { value: 'annulée', label: 'Annulée' }
 ];
 
 export const OrderManagement = () => {
@@ -72,12 +73,20 @@ export const OrderManagement = () => {
 
   const getStatutBadge = (st) => {
     switch (st) {
+      case 'prête':
       case 'prete':
+      case 'livrée':
       case 'livree':
-        return <Badge variant="success">{st.replace('_', ' ')}</Badge>;
+      case 'servie':
+        return <Badge variant="success">{st}</Badge>;
+      case 'créée':
       case 'en_attente':
+      case 'en préparation':
       case 'en_preparation':
-        return <Badge variant="warning">{st.replace('_', ' ')}</Badge>;
+      case 'confirmée':
+      case 'confirmee':
+        return <Badge variant="warning">{st}</Badge>;
+      case 'annulée':
       case 'annulee':
         return <Badge variant="danger">annulée</Badge>;
       default:
@@ -115,7 +124,7 @@ export const OrderManagement = () => {
           >
             <option value="">Tous les statuts</option>
             {STATUTS.map((s) => (
-              <option key={s} value={s}>{s.replace('_', ' ')}</option>
+              <option key={s.value} value={s.value}>{s.label}</option>
             ))}
           </select>
 
@@ -178,7 +187,7 @@ export const OrderManagement = () => {
                       className="text-[10px] font-bold py-1 px-1.5 rounded-lg bg-surface-muted border border-surface-border capitalize"
                     >
                       {STATUTS.map((s) => (
-                        <option key={s} value={s}>{s.replace('_', ' ')}</option>
+                        <option key={s.value} value={s.value}>{s.label}</option>
                       ))}
                     </select>
                   </td>

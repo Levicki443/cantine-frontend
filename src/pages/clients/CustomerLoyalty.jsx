@@ -5,7 +5,9 @@
  * Suppression totale des icônes et caractères étoiles — Notation chiffrée sobre.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import apiClient from '../../api/client';
+import { useAuth } from '../../context/AuthContext';
 import AppLayout from '../../components/AppLayout';
 import Badge from '../../components/Badge';
 import {
@@ -16,7 +18,8 @@ import {
   Plus,
   Send,
   MessageSquare,
-  ThumbsUp
+  ThumbsUp,
+  RefreshCw
 } from 'lucide-react';
 
 const AVIS_EXEMPLES = [
@@ -26,10 +29,13 @@ const AVIS_EXEMPLES = [
 ];
 
 export const CustomerLoyalty = () => {
+  const { user } = useAuth();
   const [retours, setRetours] = useState(AVIS_EXEMPLES);
+  const [kpis, setKpis] = useState({ note_moyenne: 4.8, total_avis: 148, taux_satisfaction: 94 });
+  const [chargement, setChargement] = useState(false);
   const [filtreType, setFiltreType] = useState('tous');
   const [nouveauRetour, setNouveauRetour] = useState({
-    nom_client: '',
+    nom_client: user ? `${user.prenom || ''} ${user.nom || ''}`.trim() : '',
     type: 'avis',
     note_satisfaction: 5,
     plat: '',
@@ -37,16 +43,71 @@ export const CustomerLoyalty = () => {
   });
   const [message, setMessage] = useState(null);
 
+  const chargerFeedbacks = async () => {
+    setChargement(true);
+    try {
+      const [resFeed, resKpi] = await Promise.all([
+        apiClient.get('/feedbacks'),
+        apiClient.get('/feedbacks/kpis')
+      ]);
+
+      if (resFeed.success && resFeed.feedbacks && resFeed.feedbacks.length > 0) {
+        const formates = resFeed.feedbacks.map((f) => ({
+          id: f._id,
+          nom: f.nom_client,
+          type: f.type,
+          note: f.note_satisfaction,
+          plat: f.meal_id?.nom || 'Menu Général',
+          commentaire: f.commentaire,
+          date: new Date(f.date_creation).toLocaleDateString('fr-FR'),
+          statut: f.statut
+        }));
+        setRetours(formates);
+      }
+      if (resKpi.success) {
+        setKpis({
+          note_moyenne: resKpi.note_moyenne || 4.8,
+          total_avis: resKpi.total_avis || 0,
+          taux_satisfaction: resKpi.taux_satisfaction || 94
+        });
+      }
+    } catch {
+      // Préserver les exemples si le serveur n'a pas encore d'avis
+    } finally {
+      setChargement(false);
+    }
+  };
+
+  useEffect(() => {
+    chargerFeedbacks();
+  }, []);
+
   const retoursFiltres = retours.filter((r) =>
     filtreType === 'tous' ? true : r.type === filtreType
   );
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!nouveauRetour.nom_client || !nouveauRetour.commentaire) return;
 
-    setRetours([
-      {
+    try {
+      await apiClient.post('/feedbacks', {
+        nom_client: nouveauRetour.nom_client,
+        type: nouveauRetour.type,
+        note_satisfaction: Number(nouveauRetour.note_satisfaction),
+        commentaire: nouveauRetour.commentaire
+      });
+      setMessage('Votre retour a bien été transmis et enregistré. Merci !');
+      setNouveauRetour({
+        nom_client: user ? `${user.prenom || ''} ${user.nom || ''}`.trim() : '',
+        type: 'avis',
+        note_satisfaction: 5,
+        plat: '',
+        commentaire: ''
+      });
+      chargerFeedbacks();
+    } catch {
+      setRetours([{
         id: Date.now().toString(),
         nom: nouveauRetour.nom_client,
         type: nouveauRetour.type,
@@ -55,12 +116,9 @@ export const CustomerLoyalty = () => {
         commentaire: nouveauRetour.commentaire,
         date: new Date().toLocaleDateString('fr-FR'),
         statut: 'nouveau'
-      },
-      ...retours
-    ]);
-
-    setNouveauRetour({ nom_client: '', type: 'avis', note_satisfaction: 5, plat: '', commentaire: '' });
-    setMessage('Retour convive enregistré avec succès.');
+      }, ...retours]);
+      setMessage('Retour enregistré localement.');
+    }
     setTimeout(() => setMessage(null), 3500);
   };
 
@@ -79,27 +137,21 @@ export const CustomerLoyalty = () => {
       {/* Cartes KPIs de Satisfaction sobres et sans étoiles */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
         <div className="p-5 card-container card-hover border-surface-border">
-          <span className="text-[10px] font-bold text-surface-textMuted uppercase tracking-wider">
-            Note Globale Moyenne
-          </span>
+          <span className="text-[10px] font-bold text-surface-textMuted uppercase tracking-wider">Note Globale Moyenne</span>
           <p className="text-2xl font-black text-brand-forest mt-1.5 flex items-baseline">
-            4.8 <span className="text-xs text-surface-textMuted ml-1.5 font-bold">/ 5.0</span>
+            {kpis.note_moyenne} <span className="text-xs text-surface-textMuted ml-1.5 font-bold">/ 5.0</span>
           </p>
-          <p className="text-[11px] text-surface-textMuted mt-1">148 avis certifiés</p>
+          <p className="text-[11px] text-surface-textMuted mt-1">{kpis.total_avis} avis certifiés</p>
         </div>
 
         <div className="p-5 card-container card-hover border-surface-border">
-          <span className="text-[10px] font-bold text-surface-textMuted uppercase tracking-wider">
-            Taux de Satisfaction
-          </span>
-          <p className="text-2xl font-black text-brand-forest mt-1.5">94 %</p>
+          <span className="text-[10px] font-bold text-surface-textMuted uppercase tracking-wider">Taux de Satisfaction</span>
+          <p className="text-2xl font-black text-brand-forest mt-1.5">{kpis.taux_satisfaction} %</p>
           <p className="text-[11px] text-surface-textMuted mt-1">Convives satisfaits</p>
         </div>
 
         <div className="p-5 card-container card-hover border-surface-border">
-          <span className="text-[10px] font-bold text-surface-textMuted uppercase tracking-wider">
-            Doléances en Cours
-          </span>
+          <span className="text-[10px] font-bold text-surface-textMuted uppercase tracking-wider">Doléances en Cours</span>
           <p className="text-2xl font-black text-brand-terracotta mt-1.5">
             {retours.filter((r) => r.type === 'reclamation' && r.statut !== 'resolu').length}
           </p>
@@ -107,12 +159,8 @@ export const CustomerLoyalty = () => {
         </div>
 
         <div className="p-5 card-container card-hover border-surface-border">
-          <span className="text-[10px] font-bold text-surface-textMuted uppercase tracking-wider">
-            Préférence Principale
-          </span>
-          <p className="text-sm font-black text-brand-forest mt-2 truncate">
-            Garba Royal & Thon
-          </p>
+          <span className="text-[10px] font-bold text-surface-textMuted uppercase tracking-wider">Préférence Principale</span>
+          <p className="text-sm font-black text-brand-forest mt-2 truncate">Garba Royal & Thon</p>
           <p className="text-[11px] text-surface-textMuted mt-1">85 % de notes maximales</p>
         </div>
       </div>

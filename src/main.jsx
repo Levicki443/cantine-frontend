@@ -45,6 +45,8 @@ import CashSessionsList from './pages/caisse/CashSessionsList';
 
 // Espace Convives & Étudiants
 import ClientMenu from './pages/client/ClientMenu';
+import ClientOrders from './pages/client/ClientOrders';
+import ClientProfile from './pages/client/ClientProfile';
 
 import './index.css';
 
@@ -257,6 +259,22 @@ const AppRouter = () => {
         element={
           <ProtectedRoute allowedRoles={['client', 'administrateur']}>
             <ClientMenu />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/client/commandes"
+        element={
+          <ProtectedRoute allowedRoles={['client', 'administrateur']}>
+            <ClientOrders />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/client/profil"
+        element={
+          <ProtectedRoute allowedRoles={['client', 'administrateur']}>
+            <ClientProfile />
           </ProtectedRoute>
         }
       />
