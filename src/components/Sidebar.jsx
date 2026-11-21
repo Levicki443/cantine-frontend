@@ -2,7 +2,7 @@
  * @fileoverview Barre latérale de navigation ERP organisée par pôles métier.
  * @module components/Sidebar
  * Charte 3 couleurs : Vert Forêt (#183F35), Ivoire Chaud (#F6F3EA), Terracotta (#C87552).
- * Zéro étoile. Respect strict des rôles et modularité.
+ * Interactions tactiles fluides et repères visuels actifs.
  */
 
 import React, { useState } from 'react';
@@ -47,7 +47,6 @@ export const Sidebar = () => {
     navigate('/login');
   };
 
-  // Groupes de navigation pour Administrateur
   const adminSections = [
     {
       titre: 'Gouvernance & Équipe',
@@ -93,7 +92,6 @@ export const Sidebar = () => {
     }
   ];
 
-  // Groupes de navigation pour Gestionnaire
   const gestionnaireSections = [
     {
       titre: 'Pilotage & Restauration',
@@ -123,7 +121,6 @@ export const Sidebar = () => {
     }
   ];
 
-  // Groupes Caissier
   const caissierSections = [
     {
       titre: 'Caisse & Encaissements',
@@ -135,7 +132,6 @@ export const Sidebar = () => {
     }
   ];
 
-  // Groupes Client / Convive
   const clientSections = [
     {
       titre: 'Espace Convive',
@@ -157,7 +153,6 @@ export const Sidebar = () => {
 
   return (
     <>
-      {/* Bouton mobile flottant */}
       <button
         onClick={() => setMobileOuvert(!mobileOuvert)}
         className="lg:hidden fixed bottom-5 right-5 z-50 p-3.5 rounded-full bg-brand-forest text-surface-page shadow-2xl active:scale-95 transition"
@@ -166,7 +161,6 @@ export const Sidebar = () => {
         {mobileOuvert ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
 
-      {/* Voile d'ombrage mobile */}
       {mobileOuvert && (
         <div
           onClick={() => setMobileOuvert(false)}
@@ -174,19 +168,17 @@ export const Sidebar = () => {
         />
       )}
 
-      {/* Barre latérale Vert Forêt Profond */}
       <aside
         className={`fixed lg:static top-0 bottom-0 left-0 z-40 flex flex-col bg-brand-forest text-surface-page min-h-screen transition-all duration-300 ease-in-out border-r border-brand-forest/40 ${
           retracte ? 'w-20' : 'w-64'
         } ${mobileOuvert ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
-        {/* En-tête avec Logo Arrondi Officiel */}
         <div className="flex items-center justify-between px-4 h-16 border-b border-white/10 bg-brand-hover/40">
           <div className="flex items-center min-w-0">
             <img
               src={logo}
               alt="Logo Cantine Manager"
-              className="w-10 h-10 rounded-xl object-cover mr-3 shadow-sm flex-shrink-0 border border-white/20"
+              className="w-10 h-10 rounded-xl object-cover mr-3 shadow-sm flex-shrink-0 border border-white/20 transition-transform duration-200 hover:scale-105"
             />
             {!retracte && (
               <div className="truncate">
@@ -200,14 +192,13 @@ export const Sidebar = () => {
 
           <button
             onClick={() => setRetracte(!retracte)}
-            className="hidden lg:flex p-1.5 rounded-lg text-surface-page/70 hover:text-white hover:bg-white/10 transition"
+            className="hidden lg:flex p-1.5 rounded-lg text-surface-page/70 hover:text-white hover:bg-white/10 transition active:scale-90"
             title={retracte ? 'Déplier la barre' : 'Rétracter la barre'}
           >
             {retracte ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
         </div>
 
-        {/* Navigation catégorisée par pôles */}
         <nav className="flex-1 px-3 py-3 space-y-4 overflow-y-auto">
           {sections.map((section, idx) => (
             <div key={idx} className="space-y-1">
@@ -223,7 +214,7 @@ export const Sidebar = () => {
                   end={link.end}
                   onClick={() => setMobileOuvert(false)}
                   className={({ isActive }) =>
-                    `flex items-center px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ease-saas ${
+                    `flex items-center px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ease-saas group ${
                       isActive
                         ? 'bg-brand-terracotta text-white shadow-sm font-bold translate-x-1'
                         : 'text-surface-page/80 hover:bg-white/10 hover:text-white hover:translate-x-0.5'
@@ -231,7 +222,7 @@ export const Sidebar = () => {
                   }
                   title={retracte ? link.label : undefined}
                 >
-                  <span className="flex-shrink-0 mr-3">{link.icon}</span>
+                  <span className="flex-shrink-0 mr-3 transition-transform duration-200 group-hover:scale-110">{link.icon}</span>
                   {!retracte && <span className="truncate">{link.label}</span>}
                 </NavLink>
               ))}
@@ -239,7 +230,6 @@ export const Sidebar = () => {
           ))}
         </nav>
 
-        {/* Profil utilisateur & Déconnexion */}
         <div className="p-3 border-t border-white/10 bg-brand-hover/30">
           {!retracte && (
             <div className="flex items-center mb-2.5 px-1">
@@ -257,7 +247,7 @@ export const Sidebar = () => {
 
           <button
             onClick={handleLogout}
-            className="flex items-center justify-center w-full px-3 py-2 text-xs font-bold text-white bg-white/10 hover:bg-brand-terracotta rounded-xl transition duration-200"
+            className="flex items-center justify-center w-full px-3 py-2 text-xs font-bold text-white bg-white/10 hover:bg-brand-terracotta rounded-xl transition duration-200 active:scale-95"
             title="Se déconnecter"
           >
             <LogOut className="w-3.5 h-3.5 mr-1.5" />

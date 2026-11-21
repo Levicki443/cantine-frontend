@@ -1,7 +1,8 @@
 /**
  * @fileoverview Vitrine consultative des menus et de l'ardoise pour les convives.
  * @module pages/client/ClientMenu
- * Charte 3 couleurs : Vert Forêt (#183F35), Ivoire (#F6F3EA), Terracotta (#C87552). Zéro étoile.
+ * Charte 3 couleurs : Vert Forêt (#183F35), Ivoire Chaud (#F6F3EA), Terracotta (#C87552).
+ * Template restaurant haut de gamme avec micro-interactions et animations en cascade (< 325 lignes).
  */
 
 import React, { useEffect, useState } from 'react';
@@ -9,6 +10,7 @@ import { Link } from 'react-router-dom';
 import apiClient from '../../api/client';
 import AppLayout from '../../components/AppLayout';
 import EmptyState from '../../components/EmptyState';
+import Badge from '../../components/Badge';
 import MealCard from './MealCard';
 import ChefSpecialCard from './ChefSpecialCard';
 import MealDetailModal from './MealDetailModal';
@@ -84,7 +86,7 @@ export const ClientMenu = () => {
         }
       }
     } catch {
-      // Données par défaut préservées
+      // Données de secours préservées
     }
   };
 
@@ -114,10 +116,10 @@ export const ClientMenu = () => {
       title="Ardoise & Carte de la Cantine"
       subtitle="Découvrez les préparations fraîches du jour, la formule signature du chef et le planning hebdomadaire."
     >
-      {/* 1. Bandeau dynamique Horaires de Service aéré et lumineux */}
-      <div className="mb-6 p-4 rounded-2xl bg-surface-card border border-surface-border shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-fade-in card-lift">
+      {/* 1. Bandeau dynamique Horaires de Service avec LED pulsante */}
+      <div className="mb-6 p-4 rounded-2xl bg-white border border-surface-border shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-fade-in">
         <div className="flex items-center space-x-3.5">
-          <div className="p-2.5 rounded-xl bg-brand-light text-brand-forest flex-shrink-0">
+          <div className="p-3 rounded-xl bg-brand-light text-brand-forest flex-shrink-0 shadow-xs">
             <Clock className="w-5 h-5" />
           </div>
           <div>
@@ -125,10 +127,9 @@ export const ClientMenu = () => {
               <span className="text-xs font-black uppercase tracking-wider text-surface-text">
                 Service Restaurant :
               </span>
-              <span className="inline-flex items-center text-xs font-black text-brand-forest bg-brand-light px-2.5 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-state-success mr-1.5 animate-pulse-soft" />
+              <Badge variant="success" pulse>
                 {horaires.statut_service}
-              </span>
+              </Badge>
             </div>
             <p className="text-xs text-surface-textMuted mt-0.5">
               Déjeuner : <strong className="text-surface-text">{horaires.dejeuner}</strong> &bull; Dîner : <strong className="text-surface-text">{horaires.diner}</strong>
@@ -136,18 +137,18 @@ export const ClientMenu = () => {
           </div>
         </div>
 
-        <div className="text-xs text-brand-forest font-bold bg-surface-page px-3.5 py-1.5 rounded-xl border border-surface-border">
+        <div className="text-xs text-brand-forest font-bold bg-surface-page px-3.5 py-1.5 rounded-xl border border-surface-border shadow-xs">
           Petit-Déjeuner : <strong className="text-brand-terracotta">{horaires.petit_dejeuner}</strong>
         </div>
       </div>
 
-      {/* Segmented Control iOS / SaaS */}
-      <div className="inline-flex p-1.5 bg-surface-muted/60 rounded-2xl border border-surface-border mb-6 shadow-xs">
+      {/* 2. Onglets interactifs Menu du Jour vs Planning */}
+      <div className="inline-flex p-1.5 bg-surface-card rounded-2xl border border-surface-border mb-6 shadow-xs">
         <button
           onClick={() => setOngletActif('aujourdhui')}
-          className={`py-2 px-5 rounded-xl text-xs font-black flex items-center space-x-2 transition-all duration-200 btn-interactive ${
+          className={`py-2 px-5 rounded-xl text-xs font-black flex items-center space-x-2 transition-all duration-200 active:scale-95 ${
             ongletActif === 'aujourdhui'
-              ? 'bg-surface-card text-brand-forest shadow-sm'
+              ? 'bg-brand-forest text-white shadow-sm'
               : 'text-surface-textMuted hover:text-surface-text'
           }`}
         >
@@ -157,9 +158,9 @@ export const ClientMenu = () => {
 
         <button
           onClick={() => setOngletActif('semaine')}
-          className={`py-2 px-5 rounded-xl text-xs font-black flex items-center space-x-2 transition-all duration-200 btn-interactive ${
+          className={`py-2 px-5 rounded-xl text-xs font-black flex items-center space-x-2 transition-all duration-200 active:scale-95 ${
             ongletActif === 'semaine'
-              ? 'bg-surface-card text-brand-forest shadow-sm'
+              ? 'bg-brand-forest text-white shadow-sm'
               : 'text-surface-textMuted hover:text-surface-text'
           }`}
         >
@@ -170,7 +171,7 @@ export const ClientMenu = () => {
 
       {ongletActif === 'aujourdhui' ? (
         <div className="space-y-6">
-          {/* Fiche Prestige : Suggestion Spéciale du Chef */}
+          {/* Fiche Prestige : Suggestion Signature du Chef */}
           <ChefSpecialCard suggestionChef={suggestionChef} />
 
           {/* Barre de Recherche & Filtres par catégories */}
@@ -188,12 +189,12 @@ export const ClientMenu = () => {
                   placeholder="Rechercher un plat, ingrédient..."
                   value={recherche}
                   onChange={(e) => setRecherche(e.target.value)}
-                  className="pl-10 input-field text-xs py-2"
+                  className="pl-10 input-field text-xs py-2 shadow-xs"
                 />
               </div>
             </div>
 
-            {/* Boutons de filtres avec compteurs */}
+            {/* Boutons de filtres tactiles avec compteurs */}
             <div className="flex items-center space-x-2 overflow-x-auto pb-1.5">
               {categories.map((cat) => {
                 const count = getCompteurCategorie(cat);
@@ -202,10 +203,10 @@ export const ClientMenu = () => {
                   <button
                     key={cat}
                     onClick={() => setCategorieActive(cat)}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold capitalize whitespace-nowrap transition-all duration-200 flex items-center space-x-1.5 ${
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold capitalize whitespace-nowrap transition-all duration-200 flex items-center space-x-1.5 active:scale-95 ${
                       estActif
-                        ? 'bg-brand-forest text-white shadow-sm'
-                        : 'bg-surface-card border border-surface-border text-surface-text hover:bg-surface-muted'
+                        ? 'bg-brand-forest text-white shadow-sm font-black'
+                        : 'bg-white border border-surface-border text-surface-text hover:bg-surface-page'
                     }`}
                   >
                     <span>{cat}</span>
@@ -222,15 +223,17 @@ export const ClientMenu = () => {
             </div>
           </div>
 
-          {/* Grille des plats */}
+          {/* Grille des plats avec entrée en cascade */}
           {repasFiltres.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {repasFiltres.map((plat) => (
-                <MealCard key={plat._id} plat={plat} onSelect={(p) => setPlatSelectionne(p)} />
+              {repasFiltres.map((plat, idx) => (
+                <div key={plat._id} className={`animate-fade-in-up stagger-${Math.min(6, (idx % 6) + 1)}`}>
+                  <MealCard plat={plat} onSelect={(p) => setPlatSelectionne(p)} />
+                </div>
               ))}
             </div>
           ) : (
-            <div className="card-container bg-surface-card overflow-hidden">
+            <div className="card-container bg-white overflow-hidden shadow-sm">
               <EmptyState
                 icon={<UtensilsCrossed className="w-6 h-6 text-brand-forest" />}
                 title="Aucun plat ne correspond à votre recherche"
@@ -244,35 +247,34 @@ export const ClientMenu = () => {
             </div>
           )}
 
-          {/* Ruban des 3 Engagements Qualité */}
+          {/* Ruban des 3 Engagements Qualité avec élévation douce */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-            <div className="p-4 rounded-2xl bg-surface-card border border-surface-border text-center flex flex-col items-center">
-              <div className="w-8 h-8 rounded-full bg-brand-light text-brand-forest flex items-center justify-center mb-2">
+            <div className="p-4 rounded-2xl bg-white border border-surface-border text-center flex flex-col items-center shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all">
+              <div className="w-9 h-9 rounded-full bg-brand-light text-brand-forest flex items-center justify-center mb-2 shadow-xs">
                 <UtensilsCrossed className="w-4 h-4" />
               </div>
               <span className="text-xs font-black text-surface-text">Ingrédients 100% Frais</span>
-              <p className="text-[10px] text-surface-textMuted mt-0.5">Approvisionnement quotidien auprès du marché local.</p>
+              <p className="text-[10px] text-surface-textMuted mt-0.5 font-medium">Approvisionnement quotidien auprès du marché local.</p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-surface-card border border-surface-border text-center flex flex-col items-center">
-              <div className="w-8 h-8 rounded-full bg-brand-accentLight text-brand-terracotta flex items-center justify-center mb-2">
+            <div className="p-4 rounded-2xl bg-white border border-surface-border text-center flex flex-col items-center shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all">
+              <div className="w-9 h-9 rounded-full bg-brand-accentLight text-brand-terracotta flex items-center justify-center mb-2 shadow-xs">
                 <ShieldCheck className="w-4 h-4" />
               </div>
               <span className="text-xs font-black text-surface-text">Cuisiné sur Place</span>
-              <p className="text-[10px] text-surface-textMuted mt-0.5">Préparation matinale par nos chefs cuisiniers certifiés.</p>
+              <p className="text-[10px] text-surface-textMuted mt-0.5 font-medium">Préparation matinale par nos chefs cuisiniers certifiés.</p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-surface-card border border-surface-border text-center flex flex-col items-center">
-              <div className="w-8 h-8 rounded-full bg-surface-muted text-surface-text flex items-center justify-center mb-2">
+            <div className="p-4 rounded-2xl bg-white border border-surface-border text-center flex flex-col items-center shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all">
+              <div className="w-9 h-9 rounded-full bg-surface-muted text-surface-text flex items-center justify-center mb-2 shadow-xs">
                 <Clock className="w-4 h-4" />
               </div>
               <span className="text-xs font-black text-surface-text">Service Express</span>
-              <p className="text-[10px] text-surface-textMuted mt-0.5">Distribution fluide pour votre pause déjeuner.</p>
+              <p className="text-[10px] text-surface-textMuted mt-0.5 font-medium">Distribution fluide pour votre pause déjeuner.</p>
             </div>
           </div>
         </div>
       ) : (
-        /* Vue Planning Hebdomadaire modulaire */
         <WeeklyPlanningView
           joursSemaine={joursSemaine}
           jourSelectionne={jourSelectionne}
@@ -282,9 +284,9 @@ export const ClientMenu = () => {
       )}
 
       {/* Raccourci vers avis & suggestions */}
-      <div className="mt-8 p-5 rounded-2xl card-container flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="mt-8 p-5 rounded-2xl bg-white border border-surface-border shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center space-x-3.5">
-          <div className="p-2.5 rounded-xl bg-brand-light text-brand-forest">
+          <div className="p-3 rounded-xl bg-brand-light text-brand-forest shadow-xs">
             <HeartHandshake className="w-5 h-5" />
           </div>
           <div>
@@ -299,7 +301,7 @@ export const ClientMenu = () => {
 
         <Link
           to="/client/avis"
-          className="btn-primary text-xs py-2 px-4 whitespace-nowrap flex items-center space-x-1"
+          className="btn-primary text-xs py-2 px-4 whitespace-nowrap flex items-center space-x-1 shadow-sm active:scale-95"
         >
           <span>Partager mon avis</span>
           <ChevronRight className="w-3.5 h-3.5" />

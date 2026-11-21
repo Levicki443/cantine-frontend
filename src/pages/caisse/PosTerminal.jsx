@@ -15,7 +15,8 @@ import {
   DollarSign,
   Lock,
   Search,
-  AlertCircle
+  AlertCircle,
+  Plus
 } from 'lucide-react';
 
 export const PosTerminal = () => {
@@ -169,13 +170,20 @@ export const PosTerminal = () => {
   return (
     <AppLayout
       title="Terminal de Caisse Express (POS)"
-      subtitle="Encaissement immédiat, gestion des tickets et calcul automatique de monnaie"
+      subtitle="Encaissement tactile rapide, gestion des tickets et calcul dynamique de monnaie"
       breadcrumbs={[{ label: 'Opérations & Ventes', to: '/caisse' }, { label: 'Terminal POS' }]}
     >
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5 p-4 rounded-2xl bg-surface-card border border-surface-border">
+      {/* Bandeau d'état tactile de la session de caisse */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5 p-4 rounded-2xl bg-surface-card border border-surface-border shadow-sm">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-brand-light text-brand-forest flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-brand-light text-brand-forest flex items-center justify-center relative flex-shrink-0">
             <DollarSign className="w-5 h-5" />
+            {sessionActive && (
+              <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-forest opacity-75" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-brand-forest" />
+              </span>
+            )}
           </div>
           <div>
             <span className="text-[10px] uppercase font-bold text-surface-textMuted block">État de la caisse</span>
@@ -189,7 +197,7 @@ export const PosTerminal = () => {
           {sessionActive ? (
             <button
               onClick={() => { setModeModalSession('cloturer'); setModalSession(true); }}
-              className="btn-secondary text-xs border-brand-terracotta text-brand-terracotta hover:bg-brand-accentLight"
+              className="btn-secondary text-xs border-brand-terracotta text-brand-terracotta hover:bg-brand-accentLight active:scale-95"
             >
               <Lock className="w-3.5 h-3.5 mr-1.5" />
               <span>Clôturer la caisse</span>
@@ -197,7 +205,7 @@ export const PosTerminal = () => {
           ) : (
             <button
               onClick={() => { setModeModalSession('ouvrir'); setModalSession(true); }}
-              className="btn-primary text-xs"
+              className="btn-primary text-xs shadow-sm active:scale-95"
             >
               <span>Ouvrir une session</span>
             </button>
@@ -206,13 +214,14 @@ export const PosTerminal = () => {
       </div>
 
       {erreur && (
-        <div className="p-3 mb-4 text-xs rounded-xl bg-state-dangerBg border border-state-danger/30 text-state-danger flex items-center">
+        <div className="p-3 mb-4 text-xs rounded-xl bg-state-dangerBg border border-state-danger/30 text-state-danger flex items-center animate-fade-in-down">
           <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
-          <span>{erreur}</span>
+          <span className="font-semibold">{erreur}</span>
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Grille tactile des plats */}
         <div className="lg:col-span-8 flex flex-col space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative flex-1 min-w-[200px]">
@@ -230,7 +239,7 @@ export const PosTerminal = () => {
                 <button
                   key={cat}
                   onClick={() => setCategorieActive(cat)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold capitalize whitespace-nowrap transition ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold capitalize whitespace-nowrap transition active:scale-95 ${
                     categorieActive === cat
                       ? 'bg-brand-forest text-white shadow-sm'
                       : 'bg-surface-card border border-surface-border text-surface-text hover:bg-surface-page'
@@ -242,35 +251,55 @@ export const PosTerminal = () => {
             </div>
           </div>
 
+          {/* Grandes tuiles tactiles interactives */}
           <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
-            {repasFiltres.map((plat) => (
-              <button
-                key={plat._id}
-                onClick={() => ajouterAuPanier(plat)}
-                disabled={plat.quantite_disponible <= 0}
-                className="p-3.5 card-container card-hover text-left flex flex-col justify-between active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed bg-surface-card"
-              >
-                <div>
-                  <span className="text-[10px] text-surface-textMuted uppercase font-bold block truncate">
-                    {plat.categorie}
-                  </span>
-                  <span className="text-xs font-black text-surface-text line-clamp-2 mt-0.5">
-                    {plat.nom}
-                  </span>
-                </div>
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="text-xs font-black text-brand-forest">
-                    {plat.prix.toLocaleString('fr-FR')} F
-                  </span>
-                  <span className="text-[10px] text-surface-textMuted font-bold">
-                    {plat.quantite_disponible} dispo
-                  </span>
-                </div>
-              </button>
-            ))}
+            {repasFiltres.map((plat) => {
+              const dispo = plat.quantite_disponible;
+              const seuilBas = dispo > 0 && dispo <= 5;
+
+              return (
+                <button
+                  key={plat._id}
+                  onClick={() => ajouterAuPanier(plat)}
+                  disabled={dispo <= 0}
+                  className="touch-tile group relative overflow-hidden"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] text-surface-textMuted uppercase font-bold block truncate">
+                        {plat.categorie}
+                      </span>
+                      <span
+                        className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-full ${
+                          dispo <= 0
+                            ? 'bg-state-dangerBg text-state-danger'
+                            : seuilBas
+                            ? 'bg-brand-accentLight text-brand-terracotta'
+                            : 'bg-brand-light text-brand-forest'
+                        }`}
+                      >
+                        {dispo > 0 ? `${dispo} dispo` : 'Épuisé'}
+                      </span>
+                    </div>
+                    <span className="text-xs font-black text-surface-text line-clamp-2 mt-0.5 group-hover:text-brand-forest transition-colors">
+                      {plat.nom}
+                    </span>
+                  </div>
+                  <div className="mt-3 pt-2 border-t border-surface-border/50 flex items-center justify-between">
+                    <span className="text-xs font-black text-brand-forest">
+                      {plat.prix.toLocaleString('fr-FR')} F
+                    </span>
+                    <span className="w-5 h-5 rounded-full bg-brand-light text-brand-forest flex items-center justify-center group-hover:bg-brand-forest group-hover:text-white transition-colors duration-200">
+                      <Plus className="w-3 h-3" />
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
+        {/* Panier interactif */}
         <PosCart
           panier={panier}
           modifierQuantite={modifierQuantite}

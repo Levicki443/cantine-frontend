@@ -2,23 +2,14 @@
  * @fileoverview Supervision et suivi du cycle de vie des commandes au BackOffice.
  * @module pages/admin/OrderManagement
  * Conforme à la Section 7 du cahier des charges (Statuts, référence, clients, montants).
+ * Pastilles de statuts interactives et filtres réactifs.
  */
 
 import React, { useEffect, useState } from 'react';
 import apiClient from '../../api/client';
 import AppLayout from '../../components/AppLayout';
 import Badge from '../../components/Badge';
-import {
-  ShoppingBag,
-  Search,
-  Filter,
-  CheckCircle2,
-  Clock,
-  XCircle,
-  Truck,
-  RefreshCw,
-  Eye
-} from 'lucide-react';
+import { Search, RefreshCw } from 'lucide-react';
 
 const STATUTS = [
   { value: 'créée', label: 'Créée' },
@@ -78,14 +69,14 @@ export const OrderManagement = () => {
       case 'livrée':
       case 'livree':
       case 'servie':
-        return <Badge variant="success">{st}</Badge>;
+        return <Badge variant="success" pulse>{st}</Badge>;
       case 'créée':
       case 'en_attente':
       case 'en préparation':
       case 'en_preparation':
       case 'confirmée':
       case 'confirmee':
-        return <Badge variant="warning">{st}</Badge>;
+        return <Badge variant="warning" pulse>{st}</Badge>;
       case 'annulée':
       case 'annulee':
         return <Badge variant="danger">annulée</Badge>;
@@ -111,7 +102,7 @@ export const OrderManagement = () => {
               className="input-field pl-9 text-xs"
             />
           </div>
-          <button onClick={chargerCommandes} className="btn-primary text-xs py-2 px-3">
+          <button onClick={chargerCommandes} className="btn-primary text-xs py-2 px-3.5 active:scale-95">
             Filtrer
           </button>
         </div>
@@ -130,7 +121,7 @@ export const OrderManagement = () => {
 
           <button
             onClick={chargerCommandes}
-            className="btn-secondary text-xs py-2 px-3 flex items-center space-x-1"
+            className="btn-secondary text-xs py-2 px-3 flex items-center space-x-1 active:scale-95 shadow-xs"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${chargement ? 'animate-spin' : ''}`} />
             <span>Actualiser</span>
@@ -138,11 +129,11 @@ export const OrderManagement = () => {
         </div>
       </div>
 
-      {/* Tableau des commandes */}
-      <div className="card-container bg-surface-card border border-surface-border overflow-hidden">
+      {/* Tableau des commandes avec lignes interactives */}
+      <div className="card-container bg-surface-card border border-surface-border overflow-hidden shadow-sm animate-fade-in-up stagger-1">
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left">
-            <thead className="bg-surface-page/60 border-b border-surface-border text-surface-textMuted uppercase text-[10px]">
+            <thead className="bg-surface-page/70 border-b border-surface-border text-surface-textMuted uppercase text-[10px] font-bold">
               <tr>
                 <th className="py-3 px-4">Réf. Commande</th>
                 <th className="py-3 px-4">Client</th>
@@ -174,8 +165,8 @@ export const OrderManagement = () => {
                     {cmd.montant_total?.toLocaleString('fr-FR')} FCFA
                   </td>
                   <td className="py-3 px-4">
-                    <span className="capitalize font-semibold text-surface-text">{cmd.mode_paiement || 'espèces'}</span>
-                    <span className="text-[10px] text-state-success block">Payé</span>
+                    <span className="capitalize font-semibold text-surface-text block">{cmd.mode_paiement || 'espèces'}</span>
+                    <span className="text-[10px] text-brand-forest font-bold">Payé</span>
                   </td>
                   <td className="py-3 px-4">
                     {getStatutBadge(cmd.statut)}
@@ -184,7 +175,7 @@ export const OrderManagement = () => {
                     <select
                       value={cmd.statut}
                       onChange={(e) => handleChangerStatut(cmd._id, e.target.value)}
-                      className="text-[10px] font-bold py-1 px-1.5 rounded-lg bg-surface-muted border border-surface-border capitalize"
+                      className="text-[10px] font-bold py-1 px-2 rounded-lg bg-surface-muted border border-surface-border capitalize cursor-pointer focus:outline-none focus:border-brand-forest"
                     >
                       {STATUTS.map((s) => (
                         <option key={s.value} value={s.value}>{s.label}</option>
@@ -209,4 +200,3 @@ export const OrderManagement = () => {
 };
 
 export default OrderManagement;
-

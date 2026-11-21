@@ -1,8 +1,8 @@
 /**
- * @fileoverview Disposition maîtresse globale de l'application (Layout).
+ * @fileoverview Disposition maîtresse globale de l'application (Layout ERP).
  * @module components/AppLayout
  * Assure la cohérence visuelle, la navigation et le motion design responsive.
- * Charte 3 couleurs : Vert Forêt, Ivoire Chaud, Terracotta.
+ * Charte 3 couleurs : Vert Forêt (#183F35), Ivoire Chaud (#F6F3EA), Terracotta (#C87552).
  */
 
 import React from 'react';
@@ -19,7 +19,7 @@ import Header from './Header';
  */
 export const AppLayout = ({ title, subtitle, breadcrumbs = [], children }) => {
   return (
-    <div className="flex h-screen bg-surface-page overflow-hidden">
+    <div className="flex h-screen bg-[#F8F6F0] overflow-hidden">
       {/* Barre latérale persistante avec transition fluide */}
       <Sidebar />
 
@@ -27,7 +27,7 @@ export const AppLayout = ({ title, subtitle, breadcrumbs = [], children }) => {
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <Header title={title} subtitle={subtitle} breadcrumbs={breadcrumbs} />
 
-        <main className="flex-1 overflow-y-auto p-3.5 sm:p-5 md:p-7">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
           <div className="max-w-7xl mx-auto animate-fade-in-up">
             {children}
           </div>

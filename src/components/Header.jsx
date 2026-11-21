@@ -2,7 +2,7 @@
  * @fileoverview Barre d'en-tête supérieure avec fil d'Ariane et centre d'alertes.
  * @module components/Header
  * Charte 3 couleurs : Vert Forêt (#183F35), Ivoire (#F6F3EA), Terracotta (#C87552).
- * Zéro icône étoile.
+ * Micro-interactions soignées et notifications réactives.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -14,9 +14,7 @@ import logo from '../assets/logo.jpg';
 import {
   Bell,
   Calendar,
-  ShieldCheck,
   ChevronRight,
-  ExternalLink,
   LogOut,
   UserCheck
 } from 'lucide-react';
@@ -76,7 +74,6 @@ export const Header = ({ title = 'Tableau de bord', subtitle, breadcrumbs = [] }
 
   return (
     <header className="h-16 flex items-center justify-between px-4 sm:px-6 bg-surface-card border-b border-surface-border relative z-30 transition-colors shadow-xs">
-      {/* Zone gauche : Logo mobile + Titre + Fil d'Ariane */}
       <div className="flex items-center space-x-3 min-w-0">
         <img
           src={logo}
@@ -110,7 +107,6 @@ export const Header = ({ title = 'Tableau de bord', subtitle, breadcrumbs = [] }
         </div>
       </div>
 
-      {/* Zone droite : Date, Rôle, Alertes & Profil */}
       <div className="flex items-center space-x-2 sm:space-x-3">
         <div className="hidden xl:flex items-center text-xs text-surface-text font-bold bg-surface-page px-3.5 py-1.5 rounded-xl border border-surface-border shadow-sm">
           <Calendar className="w-3.5 h-3.5 mr-2 text-brand-forest" />
@@ -118,71 +114,54 @@ export const Header = ({ title = 'Tableau de bord', subtitle, breadcrumbs = [] }
         </div>
 
         <Badge variant={getRoleVariant(role)}>
-          <ShieldCheck className="w-3.5 h-3.5 mr-1" />
-          <span className="capitalize">{role || 'Convive'}</span>
+          {role?.toUpperCase() || 'INVITÉ'}
         </Badge>
 
-        {/* Notifications pour Admin et Gestionnaire */}
         {(role === 'administrateur' || role === 'gestionnaire') && (
           <div className="relative">
             <button
-              onClick={() => setMenuOuvert(!menuOuvert)}
-              title="Centre d'alertes & notifications"
-              className="relative p-2 text-surface-textMuted hover:text-brand-forest hover:bg-surface-page rounded-xl transition duration-150"
+              onClick={() => {
+                setMenuOuvert(!menuOuvert);
+                setProfilOuvert(false);
+              }}
+              className="p-2 rounded-xl text-surface-textMuted hover:text-brand-forest hover:bg-surface-page transition active:scale-90 relative"
+              title="Centre de notifications"
             >
               <Bell className="w-5 h-5" />
               {nonLues > 0 && (
-                <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-terracotta text-[9px] font-black text-white shadow-sm animate-pulse-subtle">
-                  {nonLues > 9 ? '9+' : nonLues}
+                <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-terracotta opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-terracotta" />
                 </span>
               )}
             </button>
 
             {menuOuvert && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-surface-card border border-surface-border shadow-2xl p-4 z-50 animate-scale-in">
-                <div className="flex items-center justify-between border-b border-surface-border pb-2.5 mb-2.5">
-                  <span className="text-xs font-bold text-surface-text">
-                    Notifications ({nonLues} non lues)
+              <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-surface-card border border-surface-border shadow-xl py-2 z-50 animate-scale-in">
+                <div className="px-4 py-2 border-b border-surface-border flex items-center justify-between">
+                  <span className="text-xs font-bold text-surface-text">Alertes & Notifications</span>
+                  <span className="text-[10px] font-extrabold text-brand-terracotta bg-brand-accentLight px-2 py-0.5 rounded-full">
+                    {nonLues} non lue(s)
                   </span>
-                  <Link
-                    to="/admin/notifications"
-                    onClick={() => setMenuOuvert(false)}
-                    className="text-[10px] text-brand-forest font-bold hover:underline flex items-center space-x-1"
-                  >
-                    <span>Voir tout</span>
-                    <ExternalLink className="w-2.5 h-2.5" />
-                  </Link>
                 </div>
-
-                <div className="max-h-72 overflow-y-auto space-y-2">
-                  {notifications.slice(0, 5).map((n) => (
-                    <div
-                      key={n._id}
-                      className={`p-2.5 rounded-xl border text-xs transition duration-150 ${
-                        n.lu
-                          ? 'bg-surface-page/40 border-surface-border text-surface-textMuted'
-                          : 'bg-brand-light/30 border-brand-forest/20 text-surface-text font-semibold'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <span className="text-[11px] block">{n.titre}</span>
-                        {!n.lu && (
-                          <button
-                            onClick={(e) => marquerLue(n._id, e)}
-                            className="text-[10px] text-brand-terracotta hover:underline ml-2 flex-shrink-0"
-                          >
-                            Marquer lu
-                          </button>
-                        )}
+                <div className="max-h-60 overflow-y-auto divide-y divide-surface-border/50">
+                  {notifications.length > 0 ? (
+                    notifications.slice(0, 5).map((n) => (
+                      <div
+                        key={n._id}
+                        onClick={(e) => marquerLue(n._id, e)}
+                        className={`p-3 text-xs cursor-pointer transition ${
+                          n.lu ? 'bg-surface-card opacity-60' : 'bg-surface-page/60 hover:bg-surface-page'
+                        }`}
+                      >
+                        <p className="font-bold text-surface-text">{n.titre}</p>
+                        <p className="text-[11px] text-surface-textMuted line-clamp-2 mt-0.5">{n.message}</p>
                       </div>
-                      <p className="text-[10px] text-surface-textMuted font-normal mt-0.5">{n.message}</p>
+                    ))
+                  ) : (
+                    <div className="p-4 text-center text-xs text-surface-textMuted">
+                      Aucune notification récente
                     </div>
-                  ))}
-
-                  {notifications.length === 0 && (
-                    <p className="text-center text-xs text-surface-textMuted py-4">
-                      Aucune nouvelle notification.
-                    </p>
                   )}
                 </div>
               </div>
@@ -190,30 +169,31 @@ export const Header = ({ title = 'Tableau de bord', subtitle, breadcrumbs = [] }
           </div>
         )}
 
-        {/* Profil rapide avec menu dropdown */}
         <div className="relative">
           <button
-            onClick={() => setProfilOuvert(!profilOuvert)}
-            className="flex items-center space-x-2 p-1.5 rounded-xl hover:bg-surface-page transition duration-150"
-            title="Menu profil"
+            onClick={() => {
+              setProfilOuvert(!profilOuvert);
+              setMenuOuvert(false);
+            }}
+            className="flex items-center space-x-2 p-1.5 rounded-xl hover:bg-surface-page transition active:scale-95"
           >
-            <div className="w-8 h-8 rounded-full bg-brand-forest text-white font-black text-xs flex items-center justify-center shadow-xs">
+            <div className="w-8 h-8 rounded-full bg-brand-forest text-surface-page flex items-center justify-center font-black text-xs shadow-sm">
               {user?.prenom?.[0] || 'U'}
             </div>
           </button>
 
           {profilOuvert && (
-            <div className="absolute right-0 mt-2 w-52 rounded-2xl bg-surface-card border border-surface-border shadow-xl p-2 z-50 animate-scale-in text-xs">
-              <div className="px-3 py-2 border-b border-surface-border mb-1">
-                <p className="font-bold text-surface-text truncate">{user?.prenom} {user?.nom}</p>
+            <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-surface-card border border-surface-border shadow-xl py-2 z-50 animate-scale-in">
+              <div className="px-4 py-2 border-b border-surface-border">
+                <p className="text-xs font-bold text-surface-text">{user?.prenom} {user?.nom}</p>
                 <p className="text-[10px] text-surface-textMuted truncate">{user?.email}</p>
               </div>
               <button
-                onClick={() => { setProfilOuvert(false); logout(); }}
-                className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-brand-terracotta hover:bg-brand-terracotta/10 font-bold transition duration-150"
+                onClick={logout}
+                className="w-full text-left px-4 py-2 text-xs text-state-danger hover:bg-state-dangerBg flex items-center transition"
               >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Se déconnecter</span>
+                <LogOut className="w-3.5 h-3.5 mr-2" />
+                <span>Déconnexion</span>
               </button>
             </div>
           )}

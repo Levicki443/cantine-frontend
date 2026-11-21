@@ -37,7 +37,7 @@
     color: var(--color-surface-text);
   }
 
-  /* Règle d'accessibilité Motion Design : respect absolu du choix utilisateur */
+  /* Règle d'accessibilité Motion Design */
   @media (prefers-reduced-motion: reduce) {
     *,
     ::before,
@@ -61,7 +61,7 @@
 }
 
 @layer components {
-  /* Bouton Principal — Vert Forêt Profond */
+  /* Bouton Principal — Vert Forêt Profond avec micro-interaction */
   .btn-primary {
     @apply inline-flex items-center justify-center px-4 py-2.5 rounded-xl font-semibold text-white bg-brand-forest hover:bg-brand-hover active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-brand-forest/30 transition-all duration-200 shadow-sm hover:shadow hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:translate-y-0;
     transition-timing-function: var(--ease-saas);
@@ -79,35 +79,55 @@
     transition-timing-function: var(--ease-saas);
   }
 
-  /* Champ de saisie moderne avec micro-interaction au focus */
+  /* Champ de saisie moderne avec focus dynamique */
   .input-field {
-    @apply w-full px-3.5 py-2.5 rounded-xl bg-surface-card border border-surface-border text-surface-text placeholder-surface-textMuted focus:outline-none focus:ring-2 focus:ring-brand-forest/20 focus:border-brand-forest transition-all duration-150 text-sm shadow-sm;
+    @apply w-full px-3.5 py-2.5 rounded-xl bg-surface-card border border-surface-border text-surface-text placeholder-surface-textMuted focus:outline-none focus:ring-2 focus:ring-brand-forest/20 focus:border-brand-forest transition-all duration-200 text-sm shadow-sm;
     transition-timing-function: var(--ease-saas);
   }
 
-  /* Conteneur de carte élégant avec élévation progressive */
+  /* Conteneur de carte élégant */
   .card-container {
     @apply bg-surface-card border border-surface-border rounded-2xl shadow-sm transition-all duration-200;
     transition-timing-function: var(--ease-saas);
   }
 
-  /* Carte interactive avec survol subtil */
+  /* Carte interactive avec élévation douce */
   .card-hover {
-    @apply hover:-translate-y-1 hover:shadow-md hover:border-surface-borderFocus/30 transition-all duration-200;
+    @apply hover:-translate-y-1 hover:shadow-md hover:border-brand-forest/30 transition-all duration-200;
     transition-timing-function: var(--ease-saas);
   }
 
-  /* Ligne de tableau avec survol doux */
+  /* Tuile tactile pour caisse POS avec rétroaction au clic */
+  .touch-tile {
+    @apply p-4 rounded-2xl bg-surface-card border border-surface-border text-left flex flex-col justify-between min-h-[120px] shadow-sm hover:shadow-md hover:-translate-y-1 active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer select-none;
+    transition-timing-function: var(--ease-saas);
+  }
+
+  /* Ligne de tableau avec survol dynamique et glissement subtil */
   .table-row-hover {
-    @apply transition-colors duration-150 hover:bg-surface-page/70;
+    @apply transition-all duration-200 hover:bg-surface-page/80 hover:translate-x-0.5;
     transition-timing-function: var(--ease-saas);
   }
 
-  /* Délais en cascade pour apparition progressive naturelle */
-  .stagger-1 { animation-delay: 50ms; }
-  .stagger-2 { animation-delay: 100ms; }
-  .stagger-3 { animation-delay: 150ms; }
-  .stagger-4 { animation-delay: 200ms; }
-  .stagger-5 { animation-delay: 250ms; }
-  .stagger-6 { animation-delay: 300ms; }
+  /* Indicateur LED pulsant pour statuts en direct */
+  .led-pulse-forest {
+    @apply w-2 h-2 rounded-full bg-brand-forest animate-ping inline-block;
+  }
+
+  .led-pulse-terracotta {
+    @apply w-2 h-2 rounded-full bg-brand-terracotta animate-ping inline-block;
+  }
+
+  /* Barres de stock respirantes */
+  .stock-bar-glow {
+    @apply transition-all duration-500 ease-out;
+  }
+
+  /* Délais en cascade pour animation progressive d'entrée */
+  .stagger-1 { animation-delay: 40ms; }
+  .stagger-2 { animation-delay: 80ms; }
+  .stagger-3 { animation-delay: 120ms; }
+  .stagger-4 { animation-delay: 160ms; }
+  .stagger-5 { animation-delay: 200ms; }
+  .stagger-6 { animation-delay: 240ms; }
 }

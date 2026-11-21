@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ShoppingCart, Plus, Minus, Trash2, ArrowRight } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Trash2, ArrowRight, Loader2 } from 'lucide-react';
 
 export const PosCart = ({
   panier,
@@ -25,7 +25,7 @@ export const PosCart = ({
   const modesPaiementAutorises = ['espèces', 'Mobile Money', 'carte bancaire'];
 
   return (
-    <div className="lg:col-span-4 p-5 card-container flex flex-col justify-between bg-surface-card h-full animate-fade-in">
+    <div className="lg:col-span-4 p-5 card-container flex flex-col justify-between bg-surface-card h-full animate-fade-in shadow-sm">
       <div>
         <div className="flex items-center justify-between pb-3 border-b border-surface-border mb-3">
           <h3 className="text-sm font-black text-surface-text flex items-center">
@@ -43,13 +43,13 @@ export const PosCart = ({
           )}
         </div>
 
-        {/* Liste des articles du panier avec slide-up fluide */}
+        {/* Liste des articles du panier avec animation fluide */}
         <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
           {panier.length > 0 ? (
             panier.map((item) => (
               <div
                 key={item.meal_id}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-surface-page/60 border border-surface-border text-xs animate-slide-up transition-all duration-150"
+                className="flex items-center justify-between p-2.5 rounded-xl bg-surface-page/70 border border-surface-border text-xs animate-slide-up transition-all duration-150 hover:bg-surface-page"
               >
                 <div className="flex-1 min-w-0 pr-2">
                   <p className="font-bold text-surface-text truncate">{item.nom_repas}</p>
@@ -99,7 +99,7 @@ export const PosCart = ({
           </span>
         </div>
 
-        {/* Choix du mode de paiement */}
+        {/* Choix tactile du mode de paiement */}
         <div>
           <label className="block text-[11px] font-bold uppercase tracking-wider text-surface-textMuted mb-1.5">
             Mode de règlement
@@ -110,9 +110,9 @@ export const PosCart = ({
                 key={mode}
                 type="button"
                 onClick={() => setModePaiement(mode)}
-                className={`py-2 text-[11px] font-bold rounded-xl border capitalize transition-all duration-150 ease-saas ${
+                className={`py-2 text-[11px] font-bold rounded-xl border capitalize transition-all duration-150 active:scale-95 ${
                   modePaiement === mode
-                    ? 'bg-brand-forest text-white border-brand-forest shadow-xs'
+                    ? 'bg-brand-forest text-white border-brand-forest shadow-sm'
                     : 'bg-surface-card border-surface-border text-surface-text hover:bg-surface-page'
                 }`}
               >
@@ -152,10 +152,19 @@ export const PosCart = ({
         <button
           onClick={handleValiderEncaissement}
           disabled={panier.length === 0 || enCoursValidation || !sessionActive}
-          className="btn-accent w-full py-3 text-xs uppercase tracking-wider font-extrabold flex items-center justify-center space-x-1.5 shadow-md"
+          className="btn-accent w-full py-3 text-xs uppercase tracking-wider font-extrabold flex items-center justify-center space-x-1.5 shadow-md active:scale-95 disabled:active:scale-100"
         >
-          <span>{enCoursValidation ? 'Enregistrement en cours...' : 'Valider & Imprimer le Ticket'}</span>
-          <ArrowRight className="w-4 h-4 ml-1" />
+          {enCoursValidation ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+              <span>Enregistrement en cours...</span>
+            </>
+          ) : (
+            <>
+              <span>Valider & Imprimer le Ticket</span>
+              <ArrowRight className="w-4 h-4 ml-1" />
+            </>
+          )}
         </button>
       </div>
     </div>

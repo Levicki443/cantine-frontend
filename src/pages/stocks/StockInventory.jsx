@@ -1,7 +1,8 @@
 /**
  * @fileoverview Gestion des stocks de matières premières et inventaire hebdomadaire avec calcul des écarts.
  * @module pages/stocks/StockInventory
- * Conforme à la section 3 du cahier des charges opérationnel.
+ * Charte 3 couleurs : Vert Forêt (#183F35), Ivoire Chaud (#F6F3EA), Terracotta (#C87552).
+ * Interactivité tactile et barres de niveau dynamiques.
  */
 
 import React, { useState } from 'react';
@@ -14,7 +15,6 @@ import {
   AlertTriangle,
   CheckCircle,
   Search,
-  TrendingDown,
   Layers
 } from 'lucide-react';
 
@@ -61,17 +61,16 @@ export const StockInventory = () => {
   return (
     <AppLayout
       title="Stocks & Inventaire Hebdomadaire"
-      subtitle="Suivi des matières premières locales, alertes et rapprochement physique vs théorique"
+      subtitle="Suivi des matières premières locales, barres de niveau en direct et réconciliation physique"
     >
-      {/* Notifications vivantes */}
       {message && (
-        <div className="flex items-center p-3.5 mb-6 text-xs rounded-xl bg-state-successBg border border-state-success/30 text-state-success shadow-sm animate-fade-in-down">
+        <div className="flex items-center p-3.5 mb-6 text-xs rounded-xl bg-brand-light border border-brand-forest/20 text-brand-forest shadow-sm animate-fade-in-down">
           <CheckCircle className="w-4 h-4 mr-2 flex-shrink-0 animate-bounce-subtle" />
-          <span className="font-semibold">{message}</span>
+          <span className="font-bold">{message}</span>
         </div>
       )}
 
-      {/* Cartes KPI avec micro-animations */}
+      {/* Cartes KPI avec micro-animations et élévation douce */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="animate-fade-in-up stagger-1">
           <StatCard
@@ -117,7 +116,7 @@ export const StockInventory = () => {
           {!modeInventaire ? (
             <button
               onClick={() => setModeInventaire(true)}
-              className="btn-primary btn-interactive text-xs flex items-center justify-center w-full sm:w-auto px-4 py-2.5 rounded-xl shadow-sm"
+              className="btn-primary text-xs flex items-center justify-center w-full sm:w-auto px-4 py-2.5 rounded-xl shadow-sm active:scale-95"
             >
               <ClipboardList className="w-4 h-4 mr-2" />
               <span>Lancer l’inventaire du Samedi</span>
@@ -125,40 +124,40 @@ export const StockInventory = () => {
           ) : (
             <button
               onClick={validerInventaire}
-              className="btn-accent btn-interactive text-xs flex items-center justify-center w-full sm:w-auto px-4 py-2.5 rounded-xl shadow-sm"
+              className="btn-accent text-xs flex items-center justify-center w-full sm:w-auto px-4 py-2.5 rounded-xl shadow-sm active:scale-95"
             >
-              <CheckCircle className="w-4 h-4 mr-2 animate-bounce-subtle" />
+              <CheckCircle className="w-4 h-4 mr-2" />
               <span>Valider les écarts constatés</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* Tableau complet de gestion des stocks et inventaire */}
+      {/* Tableau complet avec barres de niveau et survol interactif */}
       <div className="card-container overflow-hidden shadow-sm animate-fade-in-up stagger-2">
         <div className="p-4 border-b border-surface-border flex items-center justify-between bg-surface-card">
           <h3 className="text-sm font-bold text-surface-text">
             {modeInventaire
               ? 'Mode Inventaire Hebdomadaire Actif — Renseignez le stock physique compté'
-              : 'État des Stocks & Seuils de Réapprovisionnement'}
+              : 'État des Stocks & Barres de Niveau en Direct'}
           </h3>
-          <Badge variant={modeInventaire ? 'warning' : 'forest'}>
+          <Badge variant={modeInventaire ? 'warning' : 'forest'} pulse={modeInventaire}>
             {produitsFiltres.length} matières premières
           </Badge>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-surface-page border-b border-surface-border text-surface-textMuted uppercase text-[11px]">
+            <thead className="bg-surface-page border-b border-surface-border text-surface-textMuted uppercase text-[11px] font-bold">
               <tr>
-                <th className="py-3 px-4 font-bold">Produit</th>
-                <th className="py-3 px-4 font-bold">Catégorie</th>
-                <th className="py-3 px-4 font-bold text-right">Prix Achat</th>
-                <th className="py-3 px-4 font-bold text-right">Stock Théorique</th>
-                <th className="py-3 px-4 font-bold text-right">Stock Physique Réel</th>
-                <th className="py-3 px-4 font-bold text-right">Écart Constaté</th>
-                <th className="py-3 px-4 font-bold">Péremption</th>
-                <th className="py-3 px-4 font-bold">Niveau & Statut</th>
+                <th className="py-3 px-4">Produit</th>
+                <th className="py-3 px-4">Catégorie</th>
+                <th className="py-3 px-4 text-right">Prix Achat</th>
+                <th className="py-3 px-4 text-right">Stock & Niveau</th>
+                <th className="py-3 px-4 text-right">Stock Physique</th>
+                <th className="py-3 px-4 text-right">Écart</th>
+                <th className="py-3 px-4">Péremption</th>
+                <th className="py-3 px-4">Statut</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border/60">
@@ -168,7 +167,7 @@ export const StockInventory = () => {
                 const ratio = Math.min(100, Math.round((p.stockTheorique / (p.seuil * 2.5)) * 100));
 
                 return (
-                  <tr key={p.id} className="table-row-hover transition-colors duration-150">
+                  <tr key={p.id} className="table-row-hover">
                     <td className="py-3 px-4 font-bold text-surface-text">{p.nom}</td>
                     <td className="py-3 px-4 text-surface-textMuted">{p.categorie}</td>
                     <td className="py-3 px-4 text-right font-medium text-surface-text">
@@ -177,12 +176,12 @@ export const StockInventory = () => {
                     <td className="py-3 px-4 text-right font-bold text-surface-text">
                       <div className="flex flex-col items-end">
                         <span>{p.stockTheorique} {p.unite}</span>
-                        <div className="w-16 h-1.5 bg-surface-muted/30 rounded-full mt-1 overflow-hidden">
+                        <div className="w-20 h-1.5 bg-surface-muted/50 rounded-full mt-1 overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all duration-500 ${
                               estFaible ? 'bg-brand-terracotta' : 'bg-brand-forest'
                             }`}
-                            style={{ width: `${ratio}%` }}
+                            style={{ width: `${Math.max(6, ratio)}%` }}
                           />
                         </div>
                       </div>
@@ -194,7 +193,7 @@ export const StockInventory = () => {
                           step="0.5"
                           value={p.stockPhysique}
                           onChange={(e) => handlePhysiqueChange(p.id, e.target.value)}
-                          className="w-20 px-2 py-1 text-right text-xs font-bold border border-brand-forest rounded-lg shadow-sm focus:ring-1 focus:ring-brand-forest"
+                          className="w-20 px-2 py-1 text-right text-xs font-bold border border-brand-forest rounded-lg shadow-xs focus:ring-1 focus:ring-brand-forest"
                         />
                       ) : (
                         <span className="font-semibold text-surface-text">
@@ -206,11 +205,11 @@ export const StockInventory = () => {
                       {ecart === 0 ? (
                         <span className="text-surface-textMuted">0</span>
                       ) : ecart < 0 ? (
-                        <span className="text-state-danger font-semibold">
+                        <span className="text-brand-terracotta font-semibold">
                           {ecart} {p.unite} (Perte)
                         </span>
                       ) : (
-                        <span className="text-state-success font-semibold">
+                        <span className="text-brand-forest font-semibold">
                           +{ecart} {p.unite}
                         </span>
                       )}
@@ -219,11 +218,9 @@ export const StockInventory = () => {
                       {p.peremption}
                     </td>
                     <td className="py-3 px-4">
-                      <div className={estFaible ? 'animate-pulse-soft' : ''}>
-                        <Badge variant={estFaible ? 'danger' : 'forest'}>
-                          {estFaible ? 'Seuil critique' : 'Disponible'}
-                        </Badge>
-                      </div>
+                      <Badge variant={estFaible ? 'warning' : 'forest'} pulse={estFaible}>
+                        {estFaible ? 'Seuil critique' : 'Disponible'}
+                      </Badge>
                     </td>
                   </tr>
                 );
@@ -237,4 +234,3 @@ export const StockInventory = () => {
 };
 
 export default StockInventory;
-

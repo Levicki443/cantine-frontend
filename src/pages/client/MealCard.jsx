@@ -2,21 +2,21 @@
  * @fileoverview Composant de carte repas gastronomique pour la vitrine étudiante.
  * @module pages/client/MealCard
  * Charte 3 couleurs : Vert Forêt (#183F35), Ivoire (#F6F3EA), Terracotta (#C87552).
+ * Template professionnel avec élévation dynamique et micro-interactions (< 325 lignes).
  */
 
 import React from 'react';
 import Badge from '../../components/Badge';
 import {
   UtensilsCrossed,
-  CheckCircle2,
   Flame,
   Coffee,
   ChevronRight,
-  Info
+  Sparkles
 } from 'lucide-react';
 
 /**
- * Détermine l'icône et l'étiquette de température selon la catégorie du plat.
+ * Détermine l'icône et l'étiquette selon la catégorie du plat.
  */
 const getMetadonneesCategorie = (categorie = '') => {
   const cat = categorie.toLowerCase();
@@ -24,20 +24,23 @@ const getMetadonneesCategorie = (categorie = '') => {
     return {
       indicateur: 'Frais au bar à jus',
       couleurPill: 'bg-brand-light text-brand-forest border-brand-forest/20',
-      icone: <Coffee className="w-3.5 h-3.5 mr-1 text-brand-forest" />
+      icone: <Coffee className="w-4 h-4 text-brand-forest" />,
+      iconeBg: 'bg-brand-light'
     };
   }
-  if (cat.includes('grill') || cat.includes('chaud')) {
+  if (cat.includes('grill') || cat.includes('chaud') || cat.includes('déjeuner') || cat.includes('dejeuner')) {
     return {
       indicateur: 'Chaud & mijoté sur place',
       couleurPill: 'bg-brand-accentLight text-brand-terracotta border-brand-terracotta/20',
-      icone: <Flame className="w-3.5 h-3.5 mr-1 text-brand-terracotta" />
+      icone: <Flame className="w-4 h-4 text-brand-terracotta" />,
+      iconeBg: 'bg-brand-accentLight'
     };
   }
   return {
     indicateur: 'Préparé ce matin',
     couleurPill: 'bg-surface-muted text-surface-text border-surface-border',
-    icone: <UtensilsCrossed className="w-3.5 h-3.5 mr-1 text-brand-forest" />
+    icone: <UtensilsCrossed className="w-4 h-4 text-brand-forest" />,
+    iconeBg: 'bg-surface-page'
   };
 };
 
@@ -49,38 +52,35 @@ const getMetadonneesCategorie = (categorie = '') => {
  */
 export const MealCard = ({ plat, onSelect }) => {
   const estDisponible = plat.disponible !== false && (plat.quantite_disponible ?? 10) > 0;
-  const { indicateur, couleurPill, icone } = getMetadonneesCategorie(plat.categorie);
+  const { indicateur, couleurPill, icone, iconeBg } = getMetadonneesCategorie(plat.categorie);
 
   return (
     <div
       onClick={() => onSelect && onSelect(plat)}
-      className="card-container card-hover p-5 sm:p-6 flex flex-col justify-between bg-surface-card border-surface-border group animate-fade-in cursor-pointer relative overflow-hidden"
+      className="p-5 sm:p-6 rounded-2xl bg-white border border-surface-border hover:border-brand-forest/30 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group cursor-pointer relative overflow-hidden"
     >
-      {/* Ligne d'accent supérieure */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-brand-forest/10 group-hover:bg-brand-terracotta transition-colors duration-200" />
+      {/* Accent de couleur supérieur au survol */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-surface-border group-hover:bg-brand-forest transition-colors duration-300" />
 
       <div>
-        {/* En-tête : catégorie et état de disponibilité */}
+        {/* En-tête : Badge catégorie + Icône stylisée + État de disponibilité */}
         <div className="flex items-center justify-between gap-2 mb-3">
-          <span className={`inline-flex items-center text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg border ${couleurPill}`}>
-            {icone}
-            <span>{plat.categorie || 'Cuisine locale'}</span>
-          </span>
+          <div className="flex items-center space-x-2">
+            <div className={`w-8 h-8 rounded-xl ${iconeBg} flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110 shadow-xs`}>
+              {icone}
+            </div>
+            <span className={`inline-flex items-center text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${couleurPill}`}>
+              {plat.categorie || 'Cuisine locale'}
+            </span>
+          </div>
 
-          {estDisponible ? (
-            <span className="inline-flex items-center text-[10px] font-bold text-brand-forest bg-brand-light px-2.5 py-0.5 rounded-full">
-              <CheckCircle2 className="w-3 h-3 mr-1 text-brand-forest" />
-              Disponible
-            </span>
-          ) : (
-            <span className="inline-flex items-center text-[10px] font-bold text-brand-terracotta bg-brand-accentLight px-2.5 py-0.5 rounded-full">
-              Épuisé
-            </span>
-          )}
+          <Badge variant={estDisponible ? 'success' : 'danger'} pulse={estDisponible}>
+            {estDisponible ? 'Disponible' : 'Épuisé'}
+          </Badge>
         </div>
 
-        {/* Titre du plat avec accentuation au survol */}
-        <h4 className="text-base sm:text-lg font-black text-surface-text group-hover:text-brand-forest transition-colors duration-200 leading-snug">
+        {/* Titre du plat avec mise en valeur au survol */}
+        <h4 className="text-base sm:text-lg font-black text-surface-text group-hover:text-brand-forest transition-colors duration-200 leading-snug mt-1">
           {plat.nom}
         </h4>
 
@@ -89,22 +89,22 @@ export const MealCard = ({ plat, onSelect }) => {
           {plat.description || 'Préparation fraîche du matin cuisinée avec des ingrédients locaux sélectionnés.'}
         </p>
 
-        {/* Badges d'excellence & fraîcheur */}
+        {/* Badges de qualité & fraîcheur */}
         <div className="flex flex-wrap items-center gap-1.5 mt-3.5">
-          <span className="text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-surface-page text-surface-text border border-surface-border">
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-surface-page text-surface-text border border-surface-border/60">
             Fait Maison
           </span>
-          <span className="text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-surface-page text-surface-text border border-surface-border">
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-surface-page text-surface-text border border-surface-border/60">
             Marché Local
           </span>
-          <span className="text-[9px] font-bold text-surface-textMuted text-[10px]">
+          <span className="text-[10px] text-surface-textMuted font-semibold">
             &bull; {indicateur}
           </span>
         </div>
       </div>
 
-      {/* Pied de carte : Tarif XXL et bouton d'action */}
-      <div className="mt-5 pt-3.5 border-t border-surface-border flex items-center justify-between">
+      {/* Pied de carte : Tarif et bouton d'action tactile */}
+      <div className="mt-5 pt-3.5 border-t border-surface-border/60 flex items-center justify-between">
         <div>
           <span className="text-[9px] text-surface-textMuted uppercase font-extrabold tracking-widest block">
             Tarif Convive
@@ -120,10 +120,10 @@ export const MealCard = ({ plat, onSelect }) => {
             e.stopPropagation();
             onSelect && onSelect(plat);
           }}
-          className="inline-flex items-center text-xs font-bold text-brand-forest group-hover:text-brand-terracotta bg-surface-page hover:bg-surface-muted px-3 py-1.5 rounded-xl border border-surface-border transition duration-150"
+          className="btn-primary py-2 px-3.5 text-xs shadow-xs group-hover:shadow group-hover:bg-brand-hover active:scale-95"
         >
-          <span>Détails</span>
-          <ChevronRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-0.5" />
+          <span>Découvrir</span>
+          <ChevronRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-1" />
         </button>
       </div>
     </div>
