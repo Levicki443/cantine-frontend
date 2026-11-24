@@ -59,7 +59,11 @@ apiClient.interceptors.response.use(
     if (status === 401) {
       localStorage.removeItem('cantine_token');
       localStorage.removeItem('cantine_user');
-      if (!window.location.pathname.includes('/login')) {
+      const isPrivateRoute =
+        window.location.pathname.startsWith('/admin') ||
+        window.location.pathname.startsWith('/gestionnaire') ||
+        window.location.pathname.startsWith('/caisse');
+      if (isPrivateRoute) {
         window.location.href = '/login';
       }
     }

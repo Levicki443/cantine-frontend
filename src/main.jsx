@@ -1,7 +1,7 @@
 /**
  * @fileoverview Point d'entrée principal de l'application React Cantine Manager.
  * @module main
- * Routeur racine avec protection RBAC stricte pour le BackOffice et les modules ERP.
+ * Accès public direct à la plateforme et protection RBAC pour les modules internes.
  */
 
 import React from 'react';
@@ -11,9 +11,12 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import BackendWakeupOverlay from './components/BackendWakeupOverlay';
 
-// Authentification publique
+// Espace Public Direct (Convives & Visiteurs)
+import ClientMenu from './pages/client/ClientMenu';
+import CustomerLoyalty from './pages/clients/CustomerLoyalty';
+
+// Authentification réservée au Personnel
 import Login from './pages/Login';
-import Register from './pages/Register';
 
 // BackOffice Administrateur
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -36,38 +39,32 @@ import ProfitabilityCalculator from './pages/finances/ProfitabilityCalculator';
 import SupplierPurchases from './pages/purchases/SupplierPurchases';
 import FinanceCashier from './pages/finances/FinanceCashier';
 import HygieneSecurity from './pages/hygiene/HygieneSecurity';
-import CustomerLoyalty from './pages/clients/CustomerLoyalty';
 
 // Caisse POS & Vente
 import PosTerminal from './pages/caisse/PosTerminal';
 import SalesHistory from './pages/caisse/SalesHistory';
 import CashSessionsList from './pages/caisse/CashSessionsList';
 
-// Espace Convives & Étudiants
-import ClientMenu from './pages/client/ClientMenu';
-
 import './index.css';
 
 /**
- * Routeur racine orchestrant la navigation selon le statut et les rôles.
+ * Routeur racine orchestrant l'accès direct et la navigation par rôles.
  */
 const AppRouter = () => {
   const { isAuthenticated, role } = useAuth();
 
-  const getHomeRedirect = () => {
-    if (!isAuthenticated) return '/login';
-    if (role === 'administrateur') return '/admin';
-    if (role === 'gestionnaire') return '/gestionnaire';
-    if (role === 'caissier') return '/caisse';
-    return '/client';
-  };
-
   return (
     <Routes>
-      {/* Routes Publiques */}
+      {/* --- ACCÈS PUBLIC DIRECT À LA PLATEFORME --- */}
+      <Route path="/" element={<ClientMenu />} />
+      <Route path="/client" element={<ClientMenu />} />
+      <Route path="/client/avis" element={<CustomerLoyalty />} />
+
+      {/* Redirection automatique de l'inscription vers l'accès direct */}
+      <Route path="/register" element={<Navigate to="/" replace />} />
+
+      {/* Authentification Staff / Personnel */}
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/" element={<Navigate to={getHomeRedirect()} replace />} />
 
       {/* --- BACKOFFICE ADMINISTRATEUR --- */}
       <Route
@@ -251,26 +248,7 @@ const AppRouter = () => {
         }
       />
 
-      {/* --- ESPACE ÉTUDIANTS / CONVIVES --- */}
-      <Route
-        path="/client"
-        element={
-          <ProtectedRoute allowedRoles={['client', 'administrateur']}>
-            <ClientMenu />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/client/avis"
-        element={
-          <ProtectedRoute allowedRoles={['client', 'administrateur']}>
-            <CustomerLoyalty />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="/client/*" element={<Navigate to="/client" replace />} />
-
-      {/* Redirection fallback */}
+      {/* Redirection fallback vers la plateforme directe */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

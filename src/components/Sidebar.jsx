@@ -2,12 +2,13 @@
  * @fileoverview Barre latérale de navigation ERP organisée par pôles métier.
  * @module components/Sidebar
  * Charte 3 couleurs : Vert Forêt (#183F35), Ivoire Chaud (#F6F3EA), Terracotta (#C87552).
- * Interactions tactiles fluides et repères visuels actifs.
+ * Accès public direct et connexion discrète pour l'équipe (< 325 lignes).
  */
 
-import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import React, { useState, useCallback } from 'react';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLongPress } from '../hooks/useLongPress';
 import logo from '../assets/logo.jpg';
 import {
   LayoutDashboard,
@@ -42,9 +43,16 @@ export const Sidebar = () => {
   const [retracte, setRetracte] = useState(false);
   const [mobileOuvert, setMobileOuvert] = useState(false);
 
+  // Accès secret au Back Office par appui maintenu (10 secondes)
+  const declencherAccesSecret = useCallback(() => {
+    navigate('/login');
+  }, [navigate]);
+
+  const { handlers: secretHandlers } = useLongPress(declencherAccesSecret, 10000);
+
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
   };
 
   const adminSections = [
@@ -136,7 +144,7 @@ export const Sidebar = () => {
     {
       titre: 'Espace Convive',
       links: [
-        { to: '/client', label: 'Ardoise & Menus du Jour', icon: <UtensilsCrossed className="w-4 h-4" />, end: true },
+        { to: '/', label: 'Ardoise & Menus du Jour', icon: <UtensilsCrossed className="w-4 h-4" />, end: true },
         { to: '/client/avis', label: 'Partager un Avis', icon: <MessageSquareHeart className="w-4 h-4" /> }
       ]
     }
@@ -174,7 +182,7 @@ export const Sidebar = () => {
         } ${mobileOuvert ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
         <div className="flex items-center justify-between px-4 h-16 border-b border-white/10 bg-brand-hover/40">
-          <div className="flex items-center min-w-0">
+          <Link to="/" className="flex items-center min-w-0">
             <img
               src={logo}
               alt="Logo Cantine Manager"
@@ -184,11 +192,11 @@ export const Sidebar = () => {
               <div className="truncate">
                 <span className="text-sm font-black tracking-tight text-surface-page block">Cantine Manager</span>
                 <span className="text-[10px] font-bold text-surface-page/70 uppercase tracking-widest block">
-                  {role || 'Espace ERP'}
+                  {user ? role?.toUpperCase() : 'ESPACE CANTINE'}
                 </span>
               </div>
             )}
-          </div>
+          </Link>
 
           <button
             onClick={() => setRetracte(!retracte)}
@@ -207,53 +215,72 @@ export const Sidebar = () => {
                   {section.titre}
                 </div>
               )}
-              {section.links.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  end={link.end}
-                  onClick={() => setMobileOuvert(false)}
-                  className={({ isActive }) =>
-                    `flex items-center px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ease-saas group ${
-                      isActive
-                        ? 'bg-brand-terracotta text-white shadow-sm font-bold translate-x-1'
-                        : 'text-surface-page/80 hover:bg-white/10 hover:text-white hover:translate-x-0.5'
-                    }`
-                  }
-                  title={retracte ? link.label : undefined}
-                >
-                  <span className="flex-shrink-0 mr-3 transition-transform duration-200 group-hover:scale-110">{link.icon}</span>
-                  {!retracte && <span className="truncate">{link.label}</span>}
-                </NavLink>
-              ))}
+              {section.links.map((link) => {
+                const estCibleSecrete = !user && link.to === '/';
+                const secretProps = estCibleSecrete ? secretHandlers : {};
+
+                return (
+                  <NavLink
+                    key={link.to}
+                    to={link.to}
+                    end={link.end}
+                    onClick={(e) => {
+                      if (secretProps.onClick) {
+                        secretProps.onClick(e);
+                      }
+                      if (!e.defaultPrevented) {
+                        setMobileOuvert(false);
+                      }
+                    }}
+                    onPointerDown={secretProps.onPointerDown}
+                    onPointerUp={secretProps.onPointerUp}
+                    onPointerLeave={secretProps.onPointerLeave}
+                    onPointerCancel={secretProps.onPointerCancel}
+                    onContextMenu={secretProps.onContextMenu}
+                    className={({ isActive }) =>
+                      `flex items-center px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ease-saas group select-none relative overflow-hidden ${
+                        isActive
+                          ? 'bg-brand-terracotta text-white shadow-sm font-bold translate-x-1'
+                          : 'text-surface-page/80 hover:bg-white/10 hover:text-white hover:translate-x-0.5'
+                      }`
+                    }
+                    title={retracte ? link.label : undefined}
+                  >
+                    <span className="flex-shrink-0 mr-3 transition-transform duration-200 group-hover:scale-110">{link.icon}</span>
+                    {!retracte && <span className="truncate">{link.label}</span>}
+                  </NavLink>
+                );
+              })}
             </div>
           ))}
         </nav>
 
-        <div className="p-3 border-t border-white/10 bg-brand-hover/30">
-          {!retracte && (
-            <div className="flex items-center mb-2.5 px-1">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-brand-terracotta text-white font-black text-xs flex-shrink-0 shadow-sm">
-                {user?.prenom?.[0] || 'U'}
+        {user && (
+          <div className="p-3 border-t border-white/10 bg-brand-hover/30">
+            {!retracte && (
+              <div className="flex items-center mb-2.5 px-1">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-brand-terracotta text-white font-black text-xs flex-shrink-0 shadow-sm">
+                  {user?.prenom?.[0] || 'U'}
+                </div>
+                <div className="ml-2.5 min-w-0 flex-1">
+                  <p className="text-xs font-bold text-surface-page truncate">
+                    {user?.prenom} {user?.nom}
+                  </p>
+                  <p className="text-[10px] text-surface-page/70 truncate">{user?.email}</p>
+                </div>
               </div>
-              <div className="ml-2.5 min-w-0 flex-1">
-                <p className="text-xs font-bold text-surface-page truncate">
-                  {user?.prenom} {user?.nom}
-                </p>
-                <p className="text-[10px] text-surface-page/70 truncate">{user?.email}</p>
-              </div>
-            </div>
-          )}
+            )}
 
-          <button
-            onClick={handleLogout}
-            className="flex items-center justify-center w-full px-3 py-2 text-xs font-bold text-white bg-white/10 hover:bg-brand-terracotta rounded-xl transition duration-200 active:scale-95"
-            title="Se déconnecter"
-          >
-            <LogOut className="w-3.5 h-3.5 mr-1.5" />
-            {!retracte && <span>Déconnexion</span>}
-          </button>
-        </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center w-full px-3 py-2 text-xs font-bold text-white bg-white/10 hover:bg-brand-terracotta rounded-xl transition duration-200 active:scale-95"
+              title="Se déconnecter"
+            >
+              <LogOut className="w-3.5 h-3.5 mr-1.5" />
+              {!retracte && <span>Déconnexion</span>}
+            </button>
+          </div>
+        )}
       </aside>
     </>
   );

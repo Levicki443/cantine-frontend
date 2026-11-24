@@ -2,7 +2,7 @@
  * @fileoverview Barre d'en-tête supérieure avec fil d'Ariane et centre d'alertes.
  * @module components/Header
  * Charte 3 couleurs : Vert Forêt (#183F35), Ivoire (#F6F3EA), Terracotta (#C87552).
- * Micro-interactions soignées et notifications réactives.
+ * Gestion transparente des convives invités et du personnel (< 325 lignes).
  */
 
 import React, { useState, useEffect } from 'react';
@@ -15,8 +15,7 @@ import {
   Bell,
   Calendar,
   ChevronRight,
-  LogOut,
-  UserCheck
+  LogOut
 } from 'lucide-react';
 
 export const Header = ({ title = 'Tableau de bord', subtitle, breadcrumbs = [] }) => {
@@ -75,11 +74,13 @@ export const Header = ({ title = 'Tableau de bord', subtitle, breadcrumbs = [] }
   return (
     <header className="h-16 flex items-center justify-between px-4 sm:px-6 bg-surface-card border-b border-surface-border relative z-30 transition-colors shadow-xs">
       <div className="flex items-center space-x-3 min-w-0">
-        <img
-          src={logo}
-          alt="Logo Cantine Manager"
-          className="lg:hidden w-9 h-9 rounded-xl object-cover shadow-sm border border-surface-border flex-shrink-0"
-        />
+        <Link to="/" className="lg:hidden flex-shrink-0">
+          <img
+            src={logo}
+            alt="Logo Cantine Manager"
+            className="w-9 h-9 rounded-xl object-cover shadow-sm border border-surface-border"
+          />
+        </Link>
         <div className="min-w-0">
           {breadcrumbs.length > 0 && (
             <nav aria-label="Fil d'Ariane" className="hidden sm:flex items-center space-x-1 text-[11px] font-semibold text-surface-textMuted mb-0.5">
@@ -114,7 +115,7 @@ export const Header = ({ title = 'Tableau de bord', subtitle, breadcrumbs = [] }
         </div>
 
         <Badge variant={getRoleVariant(role)}>
-          {role?.toUpperCase() || 'INVITÉ'}
+          {user ? role?.toUpperCase() : 'CONVIVE'}
         </Badge>
 
         {(role === 'administrateur' || role === 'gestionnaire') && (
@@ -169,35 +170,38 @@ export const Header = ({ title = 'Tableau de bord', subtitle, breadcrumbs = [] }
           </div>
         )}
 
-        <div className="relative">
-          <button
-            onClick={() => {
-              setProfilOuvert(!profilOuvert);
-              setMenuOuvert(false);
-            }}
-            className="flex items-center space-x-2 p-1.5 rounded-xl hover:bg-surface-page transition active:scale-95"
-          >
-            <div className="w-8 h-8 rounded-full bg-brand-forest text-surface-page flex items-center justify-center font-black text-xs shadow-sm">
-              {user?.prenom?.[0] || 'U'}
-            </div>
-          </button>
-
-          {profilOuvert && (
-            <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-surface-card border border-surface-border shadow-xl py-2 z-50 animate-scale-in">
-              <div className="px-4 py-2 border-b border-surface-border">
-                <p className="text-xs font-bold text-surface-text">{user?.prenom} {user?.nom}</p>
-                <p className="text-[10px] text-surface-textMuted truncate">{user?.email}</p>
+        {user && (
+          <div className="relative">
+            <button
+              onClick={() => {
+                setProfilOuvert(!profilOuvert);
+                setMenuOuvert(false);
+              }}
+              className="flex items-center space-x-2 p-1.5 rounded-xl hover:bg-surface-page transition active:scale-95"
+              title="Mon profil"
+            >
+              <div className="w-8 h-8 rounded-full bg-brand-forest text-surface-page flex items-center justify-center font-black text-xs shadow-sm">
+                {user?.prenom?.[0] || 'U'}
               </div>
-              <button
-                onClick={logout}
-                className="w-full text-left px-4 py-2 text-xs text-state-danger hover:bg-state-dangerBg flex items-center transition"
-              >
-                <LogOut className="w-3.5 h-3.5 mr-2" />
-                <span>Déconnexion</span>
-              </button>
-            </div>
-          )}
-        </div>
+            </button>
+
+            {profilOuvert && (
+              <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-surface-card border border-surface-border shadow-xl py-2 z-50 animate-scale-in">
+                <div className="px-4 py-2 border-b border-surface-border">
+                  <p className="text-xs font-bold text-surface-text">{user?.prenom} {user?.nom}</p>
+                  <p className="text-[10px] text-surface-textMuted truncate">{user?.email}</p>
+                </div>
+                <button
+                  onClick={logout}
+                  className="w-full text-left px-4 py-2 text-xs text-state-danger hover:bg-state-dangerBg flex items-center transition"
+                >
+                  <LogOut className="w-3.5 h-3.5 mr-2" />
+                  <span>Déconnexion</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );

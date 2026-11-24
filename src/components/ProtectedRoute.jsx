@@ -9,7 +9,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 /**
- * Garde de sécurité pour les routes privées.
+ * Garde de sécurité pour les routes privées d'administration et de caisse.
  * @param {Object} props
  * @param {React.ReactNode} props.children Composant enfant à afficher si autorisé.
  * @param {Array<string>} [props.allowedRoles] Liste des rôles ayant accès à la route.
@@ -29,19 +29,17 @@ export const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     );
   }
 
-  // Redirection vers la page de connexion si non authentifié
+  // Redirection vers la page de connexion réservée au personnel si non authentifié
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // Vérification des droits d'accès basés sur les rôles RBAC
   if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
-    // Redirection automatique vers l'espace propre à son rôle pour éviter tout blocage
-    let redirectionSecurisee = '/login';
+    let redirectionSecurisee = '/';
     if (role === 'administrateur') redirectionSecurisee = '/admin';
     else if (role === 'gestionnaire') redirectionSecurisee = '/gestionnaire';
     else if (role === 'caissier') redirectionSecurisee = '/caisse';
-    else if (role === 'client') redirectionSecurisee = '/client';
 
     return <Navigate to={redirectionSecurisee} replace />;
   }
@@ -50,4 +48,3 @@ export const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 };
 
 export default ProtectedRoute;
-
